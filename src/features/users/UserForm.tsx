@@ -1,10 +1,14 @@
 import {
     Button,
     Container,
+    Grid,
     Group,
+    PasswordInput,
     Select,
+    SimpleGrid,
     Stack,
     TextInput,
+    Title,
 } from '@mantine/core'
 import { useForm, zodResolver } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
@@ -38,22 +42,13 @@ interface UserFormProps {
 }
 
 export const UserForm = ({ initialValues }: UserFormProps) => {
-    const { data, isLoading } = useQuery<FormInitialValues>(
-        'form-initial-values',
-        () =>
-            axios
-                .get('https://frontend-take-home.fetchrewards.com/form')
-                .then((resp) => resp.data)
+    const { data, isLoading } = useQuery<FormInitialValues>('form-initial-values', () =>
+        axios.get('https://frontend-take-home.fetchrewards.com/form').then((resp) => resp.data)
     )
 
     const { mutate: saveUser, isLoading: isSavingUser } = useMutation(
         (values: FormValues) =>
-            axios
-                .post(
-                    'https://frontend-take-home.fetchrewards.com/form',
-                    values
-                )
-                .then((resp) => resp.data),
+            axios.post('https://frontend-take-home.fetchrewards.com/form', values).then((resp) => resp.data),
 
         {
             onSuccess: (response) => {
@@ -82,42 +77,49 @@ export const UserForm = ({ initialValues }: UserFormProps) => {
 
     return (
         <Container>
+            <Title mt="lg" mb="lg">
+                Create User
+            </Title>
             <form onSubmit={onSubmit(submitUserForm)}>
                 <Stack>
-                    <TextInput label="Full Name" {...getInputProps('name')} />
-                    <TextInput label="Email" {...getInputProps('email')} />
-                    <TextInput
-                        label="Password"
-                        type="password"
-                        {...getInputProps('password')}
-                    />
-                    <Select
-                        label="Occupation"
-                        disabled={isLoading}
-                        data={(data?.occupations || []).map((occupation) => ({
-                            label: occupation,
-                            value: occupation,
-                        }))}
-                        {...getInputProps('occupation')}
-                    />
-                    <Select
-                        label="State"
-                        disabled={isLoading}
-                        data={(data?.states || []).map((state) => ({
-                            label: state.name,
-                            value: state.abbreviation,
-                        }))}
-                        {...getInputProps('state')}
-                    />
+                    <SimpleGrid cols={2} breakpoints={[{ maxWidth: 'md', cols: 1 }]}>
+                        <TextInput label="Full Name" {...getInputProps('name')} />
+                        <PasswordInput label="Password" {...getInputProps('password')} />
+                    </SimpleGrid>
+
+                    <Grid>
+                        <Grid.Col xs={12} lg={8}>
+                            <TextInput label="Email" {...getInputProps('email')} />
+                        </Grid.Col>
+                    </Grid>
+
+                    <SimpleGrid cols={2} breakpoints={[{ maxWidth: 'md', cols: 1 }]}>
+                        <Select
+                            label="Occupation"
+                            disabled={isLoading}
+                            data={(data?.occupations || []).map((occupation) => ({
+                                label: occupation,
+                                value: occupation,
+                            }))}
+                            {...getInputProps('occupation')}
+                        />
+
+                        <Select
+                            label="State"
+                            disabled={isLoading}
+                            data={(data?.states || []).map((state) => ({
+                                label: state.name,
+                                value: state.abbreviation,
+                            }))}
+                            {...getInputProps('state')}
+                        />
+                    </SimpleGrid>
+
                     <Group position="right" mt="xl">
                         <Button variant="outline" onClick={clearForm}>
                             Cancel / Clear
                         </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSavingUser}
-                            loading={isSavingUser}
-                        >
+                        <Button type="submit" disabled={isSavingUser} loading={isSavingUser}>
                             Submit
                         </Button>
                     </Group>
